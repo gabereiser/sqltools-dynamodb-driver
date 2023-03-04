@@ -2,13 +2,26 @@
   "$schema": "http://json-schema.org/draft-07/schema#",
   "type": "object",
   "properties": {
-    "database": {
-      "title": "Database file",
+    "region": {
+      "title": "AWS region",
+      "type": "string",
+      "minLength": 1
+    },
+    "accessKeyId": {
+      "title": "Access key ID",
+      "type": "string",
+      "minLength": 1
+    },
+    "secretAccessKey": {
+      "title": "Secret access key",
+      "type": "string",
+      "minLength": 1
+    },
+    "filter": {
+      "title": "Filter table pattern",
       "type": "string",
       "minLength": 1
     }
   },
-  "required": [
-    "database"
-  ]
+  "required": ["region", "accessKeyId", "secretAccessKey"]
 }
