@@ -9,7 +9,7 @@ const describeTable: IBaseQueries['describeTable'] = queryFactory`
   ORDER BY C.cid ASC
 `;
 
-const fetchColumns: IBaseQueries['fetchColumns'] = queryFactory`
+const fetchColumns: IBaseQueries['fetchColumns'] = queryFactory`       
 SELECT C.name AS label,
   C.*,
   C.type AS dataType,
@@ -20,11 +20,16 @@ FROM pragma_table_info('${p => p.label}') AS C
 ORDER BY cid ASC
 `;
 
+// const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
+// SELECT *
+// FROM ${p => (p.table.label || p.table)}
+// LIMIT ${p => p.limit || 50}
+// OFFSET ${p => p.offset || 0};
+// `;
+
 const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
 SELECT *
-FROM ${p => (p.table.label || p.table)}
-LIMIT ${p => p.limit || 50}
-OFFSET ${p => p.offset || 0};
+FROM "Aggregation-w2ces2ezivbwphe52gizbhhm4y-staging";
 `;
 
 const countRecords: IBaseQueries['countRecords'] = queryFactory`
@@ -42,7 +47,7 @@ ORDER BY name
 `;
 
 const fetchTables: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.TABLE);
-const fetchViews: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.VIEW , 'view');
+const fetchViews: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.VIEW, 'view');
 
 const searchTables: IBaseQueries['searchTables'] = queryFactory`
 SELECT name AS label,
@@ -62,15 +67,15 @@ FROM sqlite_master AS T
 LEFT OUTER JOIN pragma_table_info((T.name)) AS C ON 1 = 1
 WHERE 1 = 1
 ${p => p.tables.filter(t => !!t.label).length
-  ? `AND LOWER(T.name) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
-  : ''
+    ? `AND LOWER(T.name) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
+    : ''
 }
 ${p => p.search
-  ? `AND (
+    ? `AND (
     LOWER(T.name || '.' || C.name) LIKE '%${p.search.toLowerCase()}%'
     OR LOWER(C.name) LIKE '%${p.search.toLowerCase()}%'
   )`
-  : ''
+    : ''
 }
 ORDER BY C.name ASC,
   C.cid ASC
@@ -85,5 +90,5 @@ export default {
   fetchTables,
   fetchViews,
   searchTables,
-  searchColumns
-}
+  searchColumns,
+};
