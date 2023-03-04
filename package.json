@@ -2,13 +2,17 @@
   "name": "sqltools-dynamodb-driver",
   "displayName": "DynamoDB Driver",
   "description": "DynamoDB Driver to be used as base for new VSCode SQLTools drivers",
-  "version": "0.1.0",
+  "version": "0.1.2",
+  "icon": "icons/logo.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/khanghua-itr/sqltools-dynamodb-driver"
+  },
   "engines": {
-    "vscode": "^1.42.0"
+    "vscode": "^1.63.0"
   },
   "publisher": "khanghua",
   "license": "MIT",
-  "repository": {},
   "bugs": {},
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -29,6 +33,7 @@
     "mtxr.sqltools"
   ],
   "activationEvents": [
+    "*",
     "onLanguage:sql",
     "onCommand:sqltools.*"
   ],
