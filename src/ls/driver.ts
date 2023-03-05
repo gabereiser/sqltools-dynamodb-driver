@@ -1,7 +1,7 @@
 import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
 import { DynamoDBLib, DynamoDBConfig } from './dynamo';
-import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0 } from '@sqltools/types';
+import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0, IQueryOptions } from '@sqltools/types';
 import { v4 as generateId } from 'uuid';
 
 export default class DynamoDbDriver 
@@ -84,33 +84,39 @@ export default class DynamoDbDriver
   }
 
   public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    // const api = await this.open();
     switch (item.type) {
       case ContextValue.CONNECTION:
-      case ContextValue.CONNECTED_CONNECTION:
+      case ContextValue.CONNECTED_CONNECTION: {
+        const tableNames = await this.listTables();
+        return tableNames.map(table => <MConnectionExplorer.IChildItem>{
+          label: table,
+          type: ContextValue.TABLE,
+          iconId: 'table',
+          childType: ContextValue.COLUMN,
+          schema: 'table',
+          database: item.database,
+        });
+      }
+      case ContextValue.TABLE: {
         return <MConnectionExplorer.IChildItem[]>[
-          { 
-            label: 'Tables', 
-            type: ContextValue.RESOURCE_GROUP, 
-            iconId: 'folder', 
-            childType: ContextValue.TABLE, 
+          {
+            label: 'Schema',
+            type: ContextValue.RESOURCE_GROUP,
+            childType: ContextValue.COLUMN,
+            iconId: 'package',
+            schema: item.schema,
+            database: item.database,
+          }, {
+            label: 'GIS',
+            type: ContextValue.RESOURCE_GROUP,
+            childType: ContextValue.TABLE,
+            iconId: 'library',
+            schema: item.schema,
+            database: item.database,
           },
         ];
-      case ContextValue.TABLE:
-      case ContextValue.VIEW:
-        return <MConnectionExplorer.IChildItem[]>[
-          { 
-            label: 'Schema', 
-            type: ContextValue.RESOURCE_GROUP, 
-            iconId: 'layers', 
-            childType: ContextValue.COLUMN, 
-          },
-          { 
-            label: 'Indexes', 
-            type: ContextValue.RESOURCE_GROUP, 
-            iconId: 'library', 
-            childType: ContextValue.SCHEMA, 
-          },
-        ];
+      } 
       case ContextValue.RESOURCE_GROUP:
         return this.getChildrenForGroup({ item, parent });
     }
@@ -129,53 +135,34 @@ export default class DynamoDbDriver
   }
 
   private async getChildrenForGroup({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    const api = await this.open();
+    const tableName = parent.label;
+    const table = await api.describeTable(tableName);
+
     switch (item.childType) {
-      case ContextValue.TABLE:
-      case ContextValue.VIEW:
-        const tableNames = await this.listTables();
-        return tableNames.map(table => <MConnectionExplorer.IChildItem>{
-          label: table,
+      case ContextValue.TABLE: {
+        return table.indexes.map(index => <NSDatabase.ITable>{
           type: ContextValue.TABLE,
-          iconId: 'table',
-          childType: ContextValue.COLUMN,
-          schema: item.schema,
-          database: item.database,
-        });
-      case ContextValue.COLUMN:
-      case ContextValue.SCHEMA: 
-        const tableName = parent.label;
-        const api = await this.open();
-        const table = await api.describeTable(tableName);
-
-        if (item.childType === ContextValue.COLUMN) {
-          return table.columns.map(col => <NSDatabase.IColumn>{
-            label: `${col.columnName}`,
-            type: ContextValue.COLUMN,
-            dataType: col.columnType,
-            childType: ContextValue.NO_CHILD,
-            iconName: col.keyType === 'HASH' ? 'pk' 
-              : (col.keyType === 'RANGE' ? 'fk' 
-                : 'column'
-              ), 
-            isNullable: !col.keyType,
-            schema: item.schema,
-            database: item.database,
-            extra: {
-              'keyType': col.keyType,
-            },
-            table: item,
-          });
-        }
-
-        return table.indexes.map(indexName => <MConnectionExplorer.IChildItem>{
-          label: `${indexName}`,
-          type: ContextValue.NO_CHILD,
+          label: `${index.indexName}`,
           childType: ContextValue.NO_CHILD,
           iconId: 'package',
-          schema: item.schema,
-          database: item.database,
         });
+      }
+      case ContextValue.COLUMN: {
+        return table.columns.map(col => <NSDatabase.IColumn>{
+          label: `${col.columnName}`,
+          type: ContextValue.COLUMN,
+          dataType: col.columnType,
+          childType: ContextValue.NO_CHILD,
+          iconName: col.keyType === 'HASH' ? 'pk' 
+            : (col.keyType === 'RANGE' ? 'fk' 
+              : 'column'
+            ), 
+          table: item,
+        });
+      }
     }
+    
     return [];
   }
 
@@ -221,6 +208,26 @@ export default class DynamoDbDriver
     }
 
     return result;
+  }
+
+  public async showRecords(table: NSDatabase.ITable, opt = {}): Promise<NSDatabase.IResult<any>[]> {
+    const query = `SELECT * FROM "${table.label}"`;
+    return this.query(query, opt);
+  }
+
+  public async describeTable(metadata: NSDatabase.ITable, opt: IQueryOptions): Promise<NSDatabase.IResult<any>[]> {
+    const { requestId } = opt;
+    const api = await this.open();
+    const table = await api.describeTable(metadata.label);
+    return <NSDatabase.IResult<any>[]>[{
+      requestId,
+      connId: this.getId(),
+      resultId: generateId(),
+      cols: ['Result'],
+      results: [{
+        result: table,
+      }],
+    }];
   }
 
   public getStaticCompletions: IConnectionDriver['getStaticCompletions'] = async () => {
