@@ -22,17 +22,23 @@ enum Ordered {
   HIGH,
 }
 
-export interface TableColumn {
+export interface Column {
   columnName: string
   columnType: string
   keyType?: string
   sortOrdered: Ordered
 }
 
+export interface Index {
+  indexName: string
+  keys: Column[]
+}
+
 export interface Table {
   tableName: string
-  indexes: string[]
-  columns: TableColumn[]
+  indexes: Index[]
+  columns: Column[]
+  rawData: any
 }
 
 export class DynamoDBLib {
@@ -59,7 +65,7 @@ export class DynamoDBLib {
     return tablesNames;
   }
 
-  private async getColumns(tableName: string): Promise<TableColumn[]> {
+  private async getColumns(tableName: string): Promise<Column[]> {
     const command = new dynamodb.ScanCommand({
       TableName: tableName,
       Limit: 1,
@@ -70,7 +76,7 @@ export class DynamoDBLib {
     const cols = Object.keys(item).map(key => {
       const val = item[key];
       const dataType = Object.keys(dynamoDBScalarTypesMapper).find(type => !!val[type]) || '';
-      return <TableColumn>{
+      return <Column>{
         columnName: key,
         columnType: dynamoDBScalarTypesMapper[dataType] || 'unknown',
         sortOrdered: Ordered.LOW,
@@ -85,7 +91,13 @@ export class DynamoDBLib {
     });
     const result = await this.client.send(command);
     const cols = await this.getColumns(tableName);
-    const indexes = result.Table?.GlobalSecondaryIndexes?.map(x => x.IndexName) || [];
+    const indexes = result.Table?.GlobalSecondaryIndexes?.map(gsi => <Index>{
+      indexName: gsi.IndexName,
+      keys: gsi.KeySchema.map(key => <Column>{
+        columnName: key.AttributeName,
+        keyType: key.KeyType,
+      }),
+    }) || [];
     
     for (const key of result.Table.KeySchema) {
       const col = cols.find(x => x.columnName === key.AttributeName);
@@ -102,15 +114,21 @@ export class DynamoDBLib {
       tableName: tableName,
       columns: cols,
       indexes,
+      rawData: result,
     };
   }
 
-  public async query(query: string)  {
+  public async query(query: string, opt: { limit?: number } = {})  {
+    let limit = 50;
+    if (opt.limit) {
+      limit = opt.limit;
+    }
+
     const command = new dynamodb.ExecuteStatementCommand({
       Statement: query,
       ConsistentRead: false,
       ReturnConsumedCapacity: 'NONE',
-      Limit: 5000,
+      Limit: limit,
     });
     const result = await this.client.send(command);
     let cols = {};
