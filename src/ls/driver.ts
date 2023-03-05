@@ -190,21 +190,19 @@ export default class DynamoDbDriver
       );
     }
 
-    if (tables.length < 5) {
-      const queryResult = await Promise.all(
-        tables.map(async table => {
-          return api.describeTable(table).then(data => {
-            return data.indexes.map(indexName => <NSDatabase.SearchableItem>{
-              type: ContextValue.TABLE,
-              label:`"${table}"."${indexName}"`,
-              childType: ContextValue.COLUMN,
-            });
+    const queryResult = await Promise.all(
+      tables.map(async table => {
+        return api.describeTable(table).then(data => {
+          return data.indexes.map(index => <NSDatabase.SearchableItem>{
+            type: ContextValue.TABLE,
+            label:`"${table}"."${index.indexName}"`,
+            childType: ContextValue.COLUMN,
           });
-        }),
-      );
-      for (const items of queryResult) {
-        result.push(...items);
-      }
+        });
+      }),
+    );
+    for (const items of queryResult) {
+      result.push(...items);
     }
 
     return result;
