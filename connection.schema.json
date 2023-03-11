@@ -17,6 +17,10 @@
       "type": "string",
       "minLength": 1
     },
+    "sessionToken": {
+      "title": "Session Token (optional)",
+      "type": "string"
+    },
     "filter": {
       "title": "Table pattern",
       "type": "string",
