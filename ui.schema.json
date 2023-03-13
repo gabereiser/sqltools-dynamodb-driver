@@ -1,3 +1,9 @@
 {
-  "ui:order": ["region", "accessKeyId", "secretAccessKey", "sessionToken"]
+  "ui:order": [
+    "region",
+    "profile",
+    "accessKeyId",
+    "secretAccessKey",
+    "sessionToken"
+  ]
 }
