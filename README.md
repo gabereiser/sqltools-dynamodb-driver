@@ -14,12 +14,14 @@ The following IAM policy grants permissions to working with this extension.
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": ["dynamodb:ListTables", "dynamodb:DescribeTable"],
+      "Action": ["dynamodb:ListTables"],
       "Resource": ["<your_dynamo_resources>"]
     },
     {
       "Effect": "Allow",
       "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:Scan",
         "dynamodb:PartiQLInsert",
         "dynamodb:PartiQLUpdate",
         "dynamodb:PartiQLDelete",
@@ -39,18 +41,20 @@ For example:
   "Statement": [
     {
       "Effect": "Allow",
-      "Action": ["dynamodb:ListTables", "dynamodb:DescribeTable"],
+      "Action": ["dynamodb:ListTables"],
       "Resource": ["*"]
     },
     {
       "Effect": "Allow",
       "Action": [
+        "dynamodb:DescribeTable",
+        "dynamodb:Scan",
         "dynamodb:PartiQLInsert",
         "dynamodb:PartiQLUpdate",
         "dynamodb:PartiQLDelete",
         "dynamodb:PartiQLSelect"
       ],
-      "Resource": ["arn:aws:dynamodb:us-east-1:466631584237:table/*"]
+      "Resource": ["arn:aws:dynamodb:us-east-1:12345678910:table/*"]
     }
   ]
 }
