@@ -2,7 +2,7 @@
   "name": "sqltools-dynamodb-driver",
   "displayName": "DynamoDB Driver",
   "description": "DynamoDB Driver to be used as base for new VSCode SQLTools drivers",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "icon": "icons/logo.png",
   "repository": {
     "type": "git",
@@ -40,6 +40,7 @@
   "main": "./out/extension.js",
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.284.0",
+    "@aws-sdk/credential-providers": "^3.289.0",
     "@sqltools/base-driver": "latest",
     "@sqltools/types": "latest",
     "dynamodb-data-types": "^4.0.1",

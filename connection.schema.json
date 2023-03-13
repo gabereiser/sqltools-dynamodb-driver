@@ -7,6 +7,11 @@
       "type": "string",
       "minLength": 1
     },
+    "profile": {
+      "title": "AWS profile",
+      "type": "string",
+      "minLength": 1
+    },
     "accessKeyId": {
       "title": "Access key ID",
       "type": "string",
@@ -18,7 +23,7 @@
       "minLength": 1
     },
     "sessionToken": {
-      "title": "Session Token (optional)",
+      "title": "Session Token",
       "type": "string"
     },
     "filter": {
@@ -27,5 +32,5 @@
       "minLength": 1
     }
   },
-  "required": ["region", "accessKeyId", "secretAccessKey"]
+  "required": ["region"]
 }

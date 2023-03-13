@@ -3,6 +3,7 @@ import queries from './queries';
 import { DynamoDBLib, DynamoDBConfig } from './dynamo';
 import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0, IQueryOptions } from '@sqltools/types';
 import { v4 as generateId } from 'uuid';
+import { getCredential } from './credential';
 
 export default class DynamoDbDriver 
   extends AbstractDriver<DynamoDBLib, DynamoDBConfig> 
@@ -14,13 +15,11 @@ export default class DynamoDbDriver
     if (this.connection) {
       return this.connection;
     }
+
+    const credentials = getCredential(this.credentials);
     const clientConfig: DynamoDBConfig = {
       region: this.credentials.region,
-      credentials: {
-        accessKeyId: this.credentials.accessKeyId,
-        secretAccessKey: this.credentials.secretAccessKey,
-        sessionToken: this.credentials.sessionToken
-      },
+      credentials,
     };
     
     const client = new DynamoDBLib(clientConfig);
