@@ -14,15 +14,15 @@ export default class DynamoDbDriver
     if (this.connection) {
       return this.connection;
     }
-    
     const clientConfig: DynamoDBConfig = {
       region: this.credentials.region,
       credentials: {
         accessKeyId: this.credentials.accessKeyId,
         secretAccessKey: this.credentials.secretAccessKey,
+        sessionToken: this.credentials.sessionToken
       },
     };
-
+    
     const client = new DynamoDBLib(clientConfig);
     this.connection = Promise.resolve(client);
     return  this.connection;
