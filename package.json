@@ -41,19 +41,19 @@
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.284.0",
     "@aws-sdk/credential-providers": "^3.289.0",
-    "@sqltools/base-driver": "latest",
-    "@sqltools/types": "latest",
+    "@sqltools/base-driver": "^0.1.11",
     "dynamodb-data-types": "^4.0.1",
     "uuid": "^7.0.2"
   },
   "devDependencies": {
+    "typescript": "^4.9.5",
     "@babel/preset-env": "^7.5.5",
+    "@sqltools/types": "^0.1.7",
     "@types/node": "^14.0.9",
     "@types/vscode": "^1.42.0",
     "@typescript-eslint/eslint-plugin": "^5.54.0",
     "@typescript-eslint/parser": "^5.54.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
-    "eslint-config-prettier": "^8.6.0",
-    "typescript": "^3.7.3"
+    "eslint-config-prettier": "^8.6.0"
   }
 }
