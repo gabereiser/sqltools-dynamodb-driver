@@ -2,7 +2,7 @@
   "name": "sqltools-dynamodb-driver",
   "displayName": "DynamoDB Driver",
   "description": "DynamoDB Driver to be used as base for new VSCode SQLTools drivers",
-  "version": "0.1.4",
+  "version": "0.1.5",
   "icon": "icons/logo.png",
   "repository": {
     "type": "git",
