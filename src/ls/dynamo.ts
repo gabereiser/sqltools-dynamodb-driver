@@ -118,17 +118,11 @@ export class DynamoDBLib {
     };
   }
 
-  public async query(query: string, opt: { limit?: number } = {})  {
-    let limit = 50;
-    if (opt.limit) {
-      limit = opt.limit;
-    }
-
+  public async query(query: string)  {
     const command = new dynamodb.ExecuteStatementCommand({
       Statement: query,
       ConsistentRead: false,
       ReturnConsumedCapacity: 'NONE',
-      Limit: limit,
     });
     const result = await this.client.send(command);
     let cols = {};
