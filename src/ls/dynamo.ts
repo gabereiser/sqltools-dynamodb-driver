@@ -2,7 +2,9 @@ import * as dynamodb from '@aws-sdk/client-dynamodb';
 import {  DynamoDBClient,  DynamoDBClientConfig  } from '@aws-sdk/client-dynamodb';
 const attr = require('dynamodb-data-types').AttributeValue;
 
-export type DynamoDBConfig = DynamoDBClientConfig;
+export interface DynamoDBConfig extends DynamoDBClientConfig {
+  maxRows: number;
+}
 
 const dynamoDBScalarTypesMapper = {
   'N': 'number',
@@ -44,8 +46,13 @@ export interface Table {
 export class DynamoDBLib {
   private client: DynamoDBClient;
 
+  private maxRows: number;
+
+  private readonly limitRegexPattern = /limit\s+\d+/gi;
+
   constructor(config: DynamoDBConfig) {
     this.client = new DynamoDBClient(config);
+    this.maxRows = config.maxRows;
   }
 
   public async listTables(): Promise<string[]> {
@@ -118,16 +125,50 @@ export class DynamoDBLib {
     };
   }
 
-  public async query(query: string)  {
-    const command = new dynamodb.ExecuteStatementCommand({
-      Statement: query,
-      ConsistentRead: false,
-      ReturnConsumedCapacity: 'NONE',
-    });
-    const result = await this.client.send(command);
+  private findLimit(query: string): number | undefined { 
+    const matchedTexts = query.match(this.limitRegexPattern);
+    if (!matchedTexts) {
+      return undefined;
+    }
+    const limitPattern = matchedTexts[0];
+    const words = limitPattern.split(/\s+/);
+    const number = words[1];
+    return parseInt(number, 10);
+  }
+
+  private removeLimitKeyword(query: string): string {
+    return query.replace(/\s+/g, ' ').replace(this.limitRegexPattern, '');
+  }
+
+  private async queryWithOptions(query: string, opts: { limit?: number } = {}): Promise<any[]> {
+    let next;
+    let items = [];
+    do {
+      const command = new dynamodb.ExecuteStatementCommand({
+        Statement: query,
+        ConsistentRead: false,
+        ReturnConsumedCapacity: 'NONE',
+        Limit: this.maxRows,
+        NextToken: next,
+      });
+      const result = await this.client.send(command);
+      next = result.NextToken;
+      items.push(...result.Items);
+      if (opts.limit && items.length >= opts.limit) {
+        break;
+      }
+    } while (next);
+    return opts.limit ? items.splice(0, opts.limit) : items;
+  }
+
+  public async query(query: string, opts: { limit?: number } = {})  {
+    const limit = this.findLimit(query) || opts.limit;
+    const rawItems = await this.queryWithOptions(this.removeLimitKeyword(query), { limit });
+
     let cols = {};
     const items = [];
-    for (const rawItem of result.Items) {
+    for (let i = 0; i < rawItems.length; i++) {
+      const rawItem = rawItems[i];
       cols = {
         ...cols,
         ...Object.keys(rawItem).reduce((prev, x) => ({ ...prev, [x]: 1 }), {}),

@@ -1,0 +1,12 @@
+{
+  "sqltools.connections": [
+    {
+      "previewLimit": 50,
+      "driver": "DynamoDB Driver",
+      "name": "Test profle",
+      "region": "ap-southeast-1",
+      "profile": "default",
+      "group": "default"
+    }
+  ]
+}

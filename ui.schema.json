@@ -4,6 +4,7 @@
     "profile",
     "accessKeyId",
     "secretAccessKey",
-    "sessionToken"
+    "sessionToken",
+    "maxRows"
   ]
 }

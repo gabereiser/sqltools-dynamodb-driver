@@ -30,6 +30,12 @@
       "title": "Table pattern",
       "type": "string",
       "minLength": 1
+    },
+    "maxRows": {
+      "title": "Maximum number of items per one scan",
+      "type": "string",
+      "default": "500",
+      "minLength": 1
     }
   },
   "required": ["region"]

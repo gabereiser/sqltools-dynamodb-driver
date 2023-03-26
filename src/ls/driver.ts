@@ -19,6 +19,7 @@ export default class DynamoDbDriver
     const credentials = getCredential(this.credentials);
     const clientConfig: DynamoDBConfig = {
       region: this.credentials.region,
+      maxRows: this.credentials.maxRows,
       credentials,
     };
     
@@ -36,11 +37,11 @@ export default class DynamoDbDriver
   }
 
   public query: typeof AbstractDriver['prototype']['query'] = async (query, opt = {}) => {
-    const { requestId } = opt;
+    const { requestId, limit } = opt;
     const messages = [];
     try {
       const api = await this.open();
-      const { cols, items } = await api.query(query.toString());
+      const { cols, items } = await api.query(query.toString(), { limit });
       return [
         <NSDatabase.IResult>{
           requestId,
@@ -83,7 +84,6 @@ export default class DynamoDbDriver
   }
 
   public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
-    // const api = await this.open();
     switch (item.type) {
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION: {
