@@ -19,7 +19,7 @@ export default class DynamoDbDriver
     const credentials = getCredential(this.credentials);
     const clientConfig: DynamoDBConfig = {
       region: this.credentials.region,
-      maxRows: this.credentials.maxRows,
+      maxRows: this.credentials.maxRows || 500,
       credentials,
     };
     
