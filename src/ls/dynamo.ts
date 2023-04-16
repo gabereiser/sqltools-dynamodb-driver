@@ -137,7 +137,11 @@ export class DynamoDBLib {
   }
 
   private removeLimitKeyword(query: string): string {
-    return query.replace(/\s+/g, ' ').replace(this.limitRegexPattern, '');
+    return query.replace(this.limitRegexPattern, '');
+  }
+
+  private removeComments(query: string): string {
+    return query.replace(/(\/\*[^*]*\*\/)|(\/\/[^*]*)|(--[^.].*)/gm, '');
   }
 
   private async queryWithOptions(query: string, opts: { limit?: number } = {}): Promise<any[]> {
@@ -161,7 +165,8 @@ export class DynamoDBLib {
     return opts.limit ? items.splice(0, opts.limit) : items;
   }
 
-  public async query(query: string, opts: { limit?: number } = {})  {
+  public async query(rawQuery: string, opts: { limit?: number } = {})  {
+    const query = this.removeComments(rawQuery);
     const limit = this.findLimit(query) || opts.limit;
     const rawItems = await this.queryWithOptions(this.removeLimitKeyword(query), { limit });
 
