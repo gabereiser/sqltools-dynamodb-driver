@@ -39,8 +39,8 @@
   ],
   "main": "./out/extension.js",
   "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.284.0",
-    "@aws-sdk/credential-providers": "^3.289.0",
+    "@aws-sdk/client-dynamodb": "^3.352.0",
+    "@aws-sdk/credential-providers": "^3.352.0",
     "@sqltools/base-driver": "^0.1.11",
     "dynamodb-data-types": "^4.0.1",
     "uuid": "^7.0.2"
